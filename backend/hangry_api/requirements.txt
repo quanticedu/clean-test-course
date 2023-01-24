@@ -10,7 +10,7 @@ Django==4.0.6
 django-cors-headers==3.13.0
 djangorestframework==3.13.1
 durationpy==0.5
-future==0.18.2
+future==0.18.3
 hjson==3.0.2
 idna==3.3
 jmespath==1.0.1
