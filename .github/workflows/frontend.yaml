@@ -28,6 +28,7 @@ jobs:
     permissions:
 	    id-token: write
 	    contents: read
+      pull-request: write
     defaults:
       run:
         working-directory: frontend
@@ -40,7 +41,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${ secrets.AWS_IAM_ROLE }
-          role-session-name: AWS_SESSION_TOKEN
           aws-region: us-east-1
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v20
