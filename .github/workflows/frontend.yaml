@@ -40,12 +40,12 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${ secrets.AWS_IAM_ROLE }
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: us-east-1
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v20
         with:
-          aws_session_token: ${ env.AWS_SESSION_TOKEN }
+          aws_session_token: ${{ env.AWS_SESSION_TOKEN }}
           application_name: hangry-web
           environment_name: Hangryweb-env
           version_label: ${{ GITHUB.RUN_ID}}
