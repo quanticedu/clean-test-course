@@ -1,0 +1,61 @@
+name: Deploy Hangry Hippo to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest django_mock_queries six coverage
+      - name: Unit Tests
+        run: |
+          coverage run -m --source=./hangry_api pytest
+          coverage report
+  deploy:
+    needs: [build_and_test]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v2
+      - name: Disable Debug
+        run: |
+          sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${ secrets.AWS_IAM_ROLE }
+          role-session-name: AWS_SESSION_TOKEN
+          aws-region: us-east-1
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_session_token: ${ AWS_SESSION_TOKEN }
+          application_name: Hangry-api
+          environment_name: Hangryapi-env
+          version_label: ${{ GITHUB.RUN_ID}}
+          region: us-east-1
+          deployment_package: backend/deploy.zip
