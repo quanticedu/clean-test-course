@@ -26,8 +26,8 @@ jobs:
     needs: [function_test]
     runs-on: ubuntu-latest
     permissions:
-	    id-token: write
-	    contents: read
+      id-token: write
+      contents: read
       pull-request: write
     defaults:
       run:
