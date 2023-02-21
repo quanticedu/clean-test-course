@@ -28,7 +28,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-      pull-request: write
+      pull-requests: write
     defaults:
       run:
         working-directory: frontend
