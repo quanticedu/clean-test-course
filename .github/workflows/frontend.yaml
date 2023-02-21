@@ -46,6 +46,8 @@ jobs:
         uses: einaregilsson/beanstalk-deploy@v20
         with:
           aws_session_token: ${{ env.AWS_SESSION_TOKEN }}
+          aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           application_name: hangry-web
           environment_name: Hangryweb-env
           version_label: ${{ GITHUB.RUN_ID}}
