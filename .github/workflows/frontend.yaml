@@ -23,7 +23,7 @@ jobs:
       - run: npm install
       - name: Run functional tests
         run: npm test -- --coverage --watchAll=false
-#The deploy job installs dependies and runs the build.  It then zips up the build directory and the dockerfile, which AWS will use to build the container after uploading the zip file.  Afterwars, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_SECRET_ACCESS_KEY environment variables.  We use these to deploy to the AWS environment.
+#The deploy job installs dependies and runs the build.  It then zips up the build directory and the dockerfile, which AWS will use to build the container after uploading the zip file.  Afterwards, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_SECRET_ACCESS_KEY environment variables.  We use these to deploy to the AWS environment.
 
   deploy:
     needs: [function_test]
