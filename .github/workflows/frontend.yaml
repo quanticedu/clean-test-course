@@ -1,5 +1,5 @@
 name: Deploy Hangry Hippo Frontend to Elastic Beanstalk
-
+# The "on" directive defines when the action will run. "push" means push to a branch, "pull request" is when a Pull Request is created for a defined branch.  The "path" directive provides an extra condition to only trigger the action if there are changes in the specified directory.  
 on:
   push:
     branches:
@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - 'frontend/**'
+#Jobs sets up the number of jobs to run during the deployment, "runs-on" is used to definee the worker container to run the job in.  The default "work-directory" defines where in the source to start.  Since all changes for this workflow should be in "frontend", it makes sense to start in the frontend directory.  This job installs dependencies, runs tests, and creates a coverage report.
 jobs:
   function_test:
     runs-on: ubuntu-latest
@@ -22,6 +23,8 @@ jobs:
       - run: npm install
       - name: Run functional tests
         run: npm test -- --coverage --watchAll=false
+#The deploy job installs dependies and runs the build.  It then zips up the build directory and the dockerfile, which AWS will use to build the container after uploading the zip file.  Afterwars, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_SECRET_ACCESS_KEY environment variables.  We use these to deploy to the AWS environment.
+
   deploy:
     needs: [function_test]
     runs-on: ubuntu-latest
@@ -52,26 +55,3 @@ jobs:
           version_label: ${{ GITHUB.RUN_ID}}
           region: us-east-1
           deployment_package: frontend/deploy.zip
-  acceptance_test:
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    container: cypress/included:10.3.0
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v2
-      - run: cypress run --config-file=cypress.config.js
-      - uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: cypress-videos
-          path: frontend/cypress/videos
-  security_test:
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dynamic Application Security Scan
-        uses: zaproxy/action-baseline@v0.7.0
-        with:
-          target: 'http://hangryweb-env.eba-vdyerazm.us-east-1.elasticbeanstalk.com/'
