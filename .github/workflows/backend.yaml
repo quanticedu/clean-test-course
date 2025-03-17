@@ -1,0 +1,68 @@
+name: Deploy Hangry Hippo to Elastic Beanstalk
+# The "on" directive defines when the action will run. "push" means push to a branch, "pull request" is when a Pull Request is created for a defined branch.  The "path" directive provides an extra condition to only trigger the action if there are changes in the specified directory.  
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+#Jobs sets up the number of jobs to run during the deployment, "runs-on" is used to definee the worker container to run the job in.  The default "work-directory" defines where in the source to start.  Since all changes for this workflow should be in "backend", it makes sense to start in the backend directory.  This job installs dependencies, runs tests, and creates a report.
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest django_mock_queries six coverage
+      - name: Unit Tests
+        run: |
+          coverage run -m --source=./hangry_api pytest
+          coverage report
+#The deploy job sets the debug flag in the django settings.py file to false.  We perform this command in the build so that the developer can leave the debug flag as true for development purposes and does not have to change the flag every time they check in code.  After the debug flag is set, we zip the environment up (excluding the directory .git since these are files for source management) and deploy.  Afterwards, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_ACCESS_SECRET environment variables.  We use these to deploy to the AWS environment.
+  deploy:
+    needs: [build_and_test]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Disable Debug
+        run: |
+          sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          role-session-name: AWS_SESSION_TOKEN
+          aws-region: us-east-1
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          application_name: Hangry-api
+          environment_name: Hangryapi-env
+          version_label: ${{ GITHUB.RUN_ID}}
+          region: us-east-1
+          deployment_package: backend/deploy.zip

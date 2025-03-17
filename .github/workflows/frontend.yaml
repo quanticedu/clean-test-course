@@ -1,0 +1,57 @@
+name: Deploy Hangry Hippo Frontend to Elastic Beanstalk
+# The "on" directive defines when the action will run. "push" means push to a branch, "pull request" is when a Pull Request is created for a defined branch.  The "path" directive provides an extra condition to only trigger the action if there are changes in the specified directory.  
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+#Jobs sets up the number of jobs to run during the deployment, "runs-on" is used to definee the worker container to run the job in.  The default "work-directory" defines where in the source to start.  Since all changes for this workflow should be in "frontend", it makes sense to start in the frontend directory.  This job installs dependencies, runs tests, and creates a coverage report.
+jobs:
+  function_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - name: Run functional tests
+        run: npm test -- --coverage --watchAll=false
+#The deploy job installs dependies and runs the build.  It then zips up the build directory and the dockerfile, which AWS will use to build the container after uploading the zip file.  Afterwards, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_SECRET_ACCESS_KEY environment variables.  We use these to deploy to the AWS environment.
+
+  deploy:
+    needs: [function_test]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install && npm run build
+      - name: Generate deployment package
+        run: zip -r deploy.zip build Dockerfile
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          aws-region: us-east-1
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          application_name: hangry-web
+          environment_name: Hangryweb-env
+          version_label: ${{ GITHUB.RUN_ID}}
+          region: us-east-1
+          deployment_package: frontend/deploy.zip
