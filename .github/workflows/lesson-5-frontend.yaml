@@ -15,6 +15,16 @@ jobs:
 #      - run: npm install
 #      - name: Run functional tests
 #        run: npm test -- --coverage --watchAll=false
+  function_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+      - name: Run functional tests
+        run: npm test -- --coverage --watchAll=false
   deploy:
 #    needs: [function_test] (normally you'd not deploy until functional tests were complete)
     runs-on: ubuntu-latest
@@ -24,6 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 #      - run: npm install && npm run build (commented out to save learner time)
+      - run: npm install && npm run build
       - name: Generate deployment package
         run: zip -r deploy.zip build Dockerfile
       - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'

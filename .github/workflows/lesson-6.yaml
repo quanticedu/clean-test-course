@@ -35,4 +35,4 @@ jobs:
       - name: Dynamic Application Security Scan
         uses: zaproxy/action-baseline@v0.7.0
         with:
-          target: 'https://hangryhippo.quantic.host/'
+          target: 'http://hangryhippo.quantic.host/'
