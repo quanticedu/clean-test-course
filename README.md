@@ -1,6 +1,6 @@
 # quantic-test-course
 
-This repository supports the Software Testing course for the MS Software Design and Engineering program at Quantic School of Business & Technology.
+This repository supports the Software Testing course for the MS Software Design and Engineering program at Quantic School of Business & Technology..
 
 ## Table of Contents
 
