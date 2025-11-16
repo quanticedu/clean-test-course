@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - lesson-6
+
 jobs:
   function_test:
     runs-on: ubuntu-latest
@@ -15,6 +16,7 @@ jobs:
       - run: npm install
       - name: Run functional tests
         run: npm test -- --coverage --watchAll=false
+
   deploy:
     needs: [function_test]
     runs-on: ubuntu-latest
@@ -28,6 +30,7 @@ jobs:
         run: zip -r deploy.zip build Dockerfile
       - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'
         run: echo Placeholder for Deployment
+
   security_test:
     needs: [deploy]
     runs-on: ubuntu-latest

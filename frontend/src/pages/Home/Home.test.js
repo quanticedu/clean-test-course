@@ -5,13 +5,11 @@ import Home from '.';
 
 describe('Test Home', () => {
   afterEach(() => {
-  jest.restoreAllMocks();
-});
-  test('Test Render Integration', async () => {
-    //Arrange: Setup the mock API
-    //Listen for any GET requests using the axios module
+    jest.restoreAllMocks();
+  });
+
+  test('Test Render', async () => {
     const mockGet = jest.spyOn(axios, 'get');
-    //Intercept the GET requests and provide a mocked response
     mockGet.mockImplementation((url) => {
       switch (url) {
         case `${API_URL}/api/category/?format=json`:
@@ -19,35 +17,48 @@ describe('Test Home', () => {
             data: {
               status: 'success',
               data: [
-                {
-                  id: 1,
-                  name: 'Handhelds',
-                  description: "So big, you don't need thumbs.",
-                },
-                {
-                  id: 2,
-                  name: 'Appeteasers',
-                  description: 'Tease the hangry hippo, he get hangrier',
-                },
+                { id: 1, name: 'Handhelds', description: "So big, you don't need thumbs." },
+                { id: 2, name: 'Appeteasers', description: 'Tease the hangry hippo, he get hangrier' }
               ],
             },
           });
         default:
-          return Promise.resolve({
-            data: {
-              status: 'fail',
-            },
-          });
+          return Promise.resolve({ data: { status: 'fail' } });
       }
     });
 
-    //Act: Call the Home page
     render(<Home />);
-
-    //Assert: Check the values in the rendered Home page.
-    //There should be 2 categories as defined in the mock response above
     expect(await screen.findAllByTestId(/category-item/i)).toHaveLength(2);
-    //The word Appeateasers should be in there as defined in the mock response above.
+    expect(await screen.findByText('Appeteasers')).toBeInTheDocument();
+  });
+
+  test('Negative Test: Test Failed Category call', async () => {
+    const mockGet = jest.spyOn(axios, 'get');
+    mockGet.mockImplementation((url) => {
+      switch (url) {
+        case `${API_URL}/api/category/?format=json`:
+          return Promise.resolve({
+            data: {
+              status: 'fail',
+              data: [
+                { id: 1, name: 'Handhelds', description: "So big, you don't need thumbs." },
+                { id: 2, name: 'Appeteasers', description: 'Tease the hangry hippo, he get hangrier' }
+              ],
+            },
+          });
+        default:
+          return Promise.resolve({ data: { status: 'fail' } });
+      }
+    });
+
+    render(<Home />);
+    expect(screen.queryByTestId(/category-item/i)).not.toBeInTheDocument();
+  });
+
+  test('Test Integration Render', async () => {
+    render(<Home />);
+    expect(await screen.findAllByTestId(/category-item/i)).toHaveLength(2);
     expect(await screen.findByText('Appeteasers')).toBeInTheDocument();
   });
 });
+

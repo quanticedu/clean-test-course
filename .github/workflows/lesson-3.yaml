@@ -3,7 +3,8 @@ name: Lesson 3
 on:
   push:
     branches:
-      - lesson-3
+      - lesson-3-complete
+
 jobs:
   function_test:
     runs-on: ubuntu-latest
@@ -18,7 +19,8 @@ jobs:
         working-directory: frontend
       - name: Run tests
         run: npm test
-        working-directory: frontend 
+        working-directory: frontend
+
   deploy:
     needs: function_test
     runs-on: ubuntu-latest
@@ -27,7 +29,7 @@ jobs:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-#      - run: npm install && npm run build (commented out to save learner time)
+      - run: npm install && npm run build
       - name: Generate deployment package
         run: zip -r deploy.zip build Dockerfile
       - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'

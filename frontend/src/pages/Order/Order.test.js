@@ -9,15 +9,43 @@ import OrderContext from '../../context/OrderContext';
 describe('Test Order', () => {
   let orderName;
   let orderItems;
+
   beforeEach(() => {
-    //Arrange:
-    //Setup Order Context
     orderName = 'test-fun';
     orderItems = [
       { item: 'Test 1', quantity: 1 },
       { item: 'Test 2', quantity: 2 },
       { item: 'Test 3', quantity: 3 },
     ];
+
+    //Mock API calls
+    const mockGet = jest.spyOn(axios, 'get');
+    mockGet.mockImplementation((url) => {
+      switch (url) {
+        case `${API_URL}/api/delivery/test-fun/0`:
+          return Promise.resolve({
+            data: { status: 'success', data: 2.5 },
+          });
+        case `${API_URL}/api/delivery/test-fun/5`:
+          return Promise.resolve({
+            data: { status: 'success', data: 5.0 },
+          });
+        case `${API_URL}/api/subtotal/test-fun`:
+          return Promise.resolve({
+            data: { status: 'success', data: 5 },
+          });
+        case `${API_URL}/api/tax/test-fun/5`:
+          return Promise.resolve({
+            data: { status: 'success', data: 0.86 },
+          });
+        case `${API_URL}/api/total/test-fun/5`:
+          return Promise.resolve({
+            data: { status: 'success', data: 10.86 },
+          });
+        default:
+          return Promise.resolve({ data: { status: 'fail' } });
+      }
+    });
   });
 
   afterEach(() => {
@@ -25,74 +53,57 @@ describe('Test Order', () => {
   });
 
   test('Test Delivery Fee', async () => {
-    //Add a Test to verify that delivery fee shows up here
-    //Act:
-    //Setup the Mock API
     setupMock();
-    //Call the page
+
     render(
       <OrderContext.Provider value={{ orderName, orderItems }}>
         <Order />
       </OrderContext.Provider>
     );
-    //Assert: replace the return true.
+
     await waitFor(() => {
-  expect(screen.getAllByText('$2.50')).toHaveLength(1);
+      expect(screen.getAllByText('$2.50')).toHaveLength(1);
     });
+
+    expect(screen.getAllByText('$5.00')).toHaveLength(1);
   });
 
   test('Test Update Delivery Fee', async () => {
-    //Modify the delivery distance and verify that the delivery fee is updated
-    //Act:
-    //Setup the Mock API
-    setupMock();
-    //Call the page
     render(
       <OrderContext.Provider value={{ orderName, orderItems }}>
         <Order />
       </OrderContext.Provider>
     );
 
-    //ACT
-    //Update the Delivery distance by choosing the 5 mile option from the drop down
     userEvent.selectOptions(
-      // Find the select element, like a real user would.
       screen.getByRole('combobox'),
-      // Find and select the 5 mile option, like a real user would.
       screen.getByRole('option', { name: '5 miles' })
     );
-    //Assert: replace the return true.
+
     await waitFor(() => {
-      expect(screen.getAllByText('$5.00'))
-  .toHaveLength(1);;
+      expect(screen.getAllByText('$5.00')).toHaveLength(2);
     });
+
+    expect(screen.getAllByText('$0.86')).toHaveLength(1);
+    expect(screen.getAllByText('$10.86')).toHaveLength(1);
   });
 });
 
 const setupMock = () => {
-  //Mock API calls
   const mockGet = jest.spyOn(axios, 'get');
   mockGet.mockImplementation((url) => {
     switch (url) {
       case `${API_URL}/api/delivery/test-fun/0`:
         return Promise.resolve({
-          data: {
-            status: 'success',
-            data: 2.5,
-          },
+          data: { status: 'success', data: 2.5 },
         });
       case `${API_URL}/api/delivery/test-fun/5`:
         return Promise.resolve({
-          data: {
-            status: 'success',
-            data: 5.0,
-          },
+          data: { status: 'success', data: 5.0 },
         });
       default:
         return Promise.resolve({
-          data: {
-            status: 'fail',
-          },
+          data: { status: 'fail' },
         });
     }
   });
