@@ -28,3 +28,11 @@ jobs:
         run: zip -r deploy.zip build Dockerfile
       - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'
         run: echo Placeholder for Deployment
+  security_test:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+    - name: OWASP ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.7.0
+      with:
+        target: 'https://hangryhippo.quantic.host'
