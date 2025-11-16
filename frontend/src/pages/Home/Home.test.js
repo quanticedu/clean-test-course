@@ -4,7 +4,10 @@ import axios from 'axios';
 import Home from '.';
 
 describe('Test Home', () => {
-  test('Test Render', async () => {
+  afterEach(() => {
+  jest.restoreAllMocks();
+});
+  test('Test Render Integration', async () => {
     //Arrange: Setup the mock API
     //Listen for any GET requests using the axios module
     const mockGet = jest.spyOn(axios, 'get');
