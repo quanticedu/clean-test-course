@@ -6,19 +6,19 @@ on:
       - lesson-5
 
 jobs:
-security_test:
-  runs-on: ubuntu-latest 
-  defaults: 
-    run: 
-      working-directory: backend
-  name: Execute the PyCharm security test 
-  steps:
-    - uses: actions/checkout@v4
-    - name: disable debug
-      run: |
-        sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
-    - name: Run PyCharm Security 
-      uses: tonybaloney/pycharm-security@1.9.0
+  security_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    name: Execute the PyCharm security test
+    steps:
+      - uses: actions/checkout@v4
+      - name: disable debug
+        run: |
+          sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
+      - name: Run PyCharm Security
+        uses: tonybaloney/pycharm-security@1.9.0
 
   build_and_test:
     needs: security_test
@@ -42,7 +42,7 @@ security_test:
           coverage report
 
   deploy:
-    needs: [build_and_test]
+    needs: build_and_test
     runs-on: ubuntu-latest
     defaults:
       run:
