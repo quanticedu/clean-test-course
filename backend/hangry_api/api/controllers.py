@@ -8,7 +8,7 @@ class Delivery():
     elif items > 5 and distance > 3:
       return 5
     else:
-      return 2.5
+      return 3.5
 
 class Subtotal():
   def calculate(order):
