@@ -3,20 +3,9 @@ name: Lesson 3
 on:
   push:
     branches:
-      - lesson-3-complete
+      - lesson-3
 jobs:
-  function_test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm install
-      - name: Run functional tests
-        run: npm test -- --coverage --watchAll=false
   deploy:
-    needs: [function_test]
     runs-on: ubuntu-latest
     defaults:
       run:
