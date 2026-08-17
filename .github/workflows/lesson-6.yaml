@@ -3,36 +3,51 @@ name: Lesson 6
 on:
   push:
     branches:
-      - lesson-6
+      - lesson-6-complete
 jobs:
-#  function_test:
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        working-directory: frontend
-#    steps:
-#      - uses: actions/checkout@v4
-#      - run: npm install
-#      - name: Run functional tests
-#        run: npm test -- --coverage --watchAll=false
-  deploy:
-#    needs: [function_test]
+  function_test:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-#      - run: npm install && npm run build
+      - run: npm install
+      - name: Run functional tests
+        run: npm test -- --coverage --watchAll=false
+  deploy:
+    needs: [function_test]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install && npm run build
       - name: Generate deployment package
         run: zip -r deploy.zip build Dockerfile
-      - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk.'
+      - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'
         run: echo Placeholder for Deployment
-#  security_test:
-#    needs: [deploy]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Dynamic Application Security Scan
-#        uses: zaproxy/action-baseline@v0.7.0
-#        with:
-#          target: 'http://hangryhippo.quantic.host/'
+  security_test:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dynamic Application Security Scan
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: 'https://hangryhippo.quantic.host'
+  acceptance_test:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    container: cypress/included:10.3.0
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - run: cypress run --config-file=cypress.config.js
+      - uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
