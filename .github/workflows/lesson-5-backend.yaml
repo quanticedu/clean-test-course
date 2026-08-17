@@ -13,6 +13,10 @@ jobs:
     name: Execute the Pycharm security test
     steps:
       - uses: actions/checkout@v4
+      - name: disable debug
+        run: |
+          sed -i 's/DEBUG = True/DEBUG = False/g' \
+          hangry_api/hangry_api/settings.py
       - name: PyCharm Python Security Scanner
         uses: tonybaloney/pycharm-security@1.25.1
   build_and_test:
