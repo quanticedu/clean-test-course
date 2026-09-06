@@ -12,7 +12,7 @@ jobs:
         working-directory: backend
     name: Execute the PyCharm security test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Disable Debug
         run: |
           sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
@@ -20,14 +20,14 @@ jobs:
         uses: tonybaloney/pycharm-security@master
         with:
           fail_on_warnings: 'yes'
-  build_and_test:
+  unit_test:
     needs: [security_test]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
@@ -41,13 +41,13 @@ jobs:
           coverage run -m --source=./hangry_api pytest
           coverage report
   deploy:
-    needs: [build_and_test]
+    needs: [unit_test]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - name: Disable Debug
         run: |
           sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
