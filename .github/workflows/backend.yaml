@@ -14,7 +14,7 @@ on:
       - 'backend/**'
 #Jobs sets up the number of jobs to run during the deployment, "runs-on" is used to define the worker container to run the job in.  The default "work-directory" defines where in the source to start.  Since all changes for this workflow should be in "backend", it makes sense to start in the backend directory.  This job installs dependencies, runs tests, and creates a report.
 jobs:
-  build_and_test:
+  unit_test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,7 +35,7 @@ jobs:
           coverage report
 #The deploy job sets the debug flag in the django settings.py file to false.  We perform this command in the build so that the developer can leave the debug flag as true for development purposes and does not have to change the flag every time they check in code.  After the debug flag is set, we zip the environment up (excluding the directory .git since these are files for source management) and deploy.  Afterwards, we use "configure-aws-credentials" to generate temporary AWS_ACCESS_KEY and AWS_ACCESS_SECRET environment variables.  We use these to deploy to the AWS environment.
   deploy:
-    needs: [build_and_test]
+    needs: [unit_test]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
