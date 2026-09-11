@@ -26,6 +26,7 @@ jobs:
           coverage report
 
   deploy:
+    needs: [unit_test]
     runs-on: ubuntu-latest
     defaults:
       run:
