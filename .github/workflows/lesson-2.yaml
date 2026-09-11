@@ -1,4 +1,5 @@
 name: Lesson 2
+
 on:
   push:
     branches:
@@ -36,5 +37,5 @@ jobs:
           sed -i 's/DEBUG = True/DEBUG = False/g' hangry_api/hangry_api/settings.py
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
-      - name: '**PLACEHOLDER** Deploy to Elastic Beanstalk'
+      - name: '**PLACEHOLDER01** Deploy to Elastic Beanstalk'
         run: echo Placeholder for Deployment
