@@ -1,5 +1,4 @@
 name: Lesson 2
-
 on:
   push:
     branches:
