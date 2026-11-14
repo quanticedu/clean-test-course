@@ -36,3 +36,18 @@ jobs:
 #        uses: zaproxy/action-baseline@v0.15.0
 #        with:
 #          target: 'http://hangryhippo.quantic.host/'
+  acceptance_test:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    container: cypress/included:10.3.0
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: cypress run --config-file=cypress.config.js
+      - uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
